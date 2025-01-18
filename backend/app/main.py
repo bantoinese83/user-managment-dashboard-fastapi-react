@@ -3,11 +3,11 @@ from typing import List
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from backend.middlewares import init_middlewares
-from backend.schemas import UserOverview, User, UserProfile, Role, UserActivity, CommunicationTools, UserSubscription, \
+from app.middlewares import init_middlewares
+from app.db.schemas import UserOverview, User, UserProfile, Role, UserActivity, CommunicationTools, UserSubscription, \
     DataExport, UserCompliance, UserCustomization, UserEngagement, UserImportExport, Integration, SystemHealth
-from backend.database import create_all
-from backend.services import user_service
+from app.db.base import create_all
+from app.services import user_service
 
 app = FastAPI()
 
