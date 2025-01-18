@@ -20,8 +20,16 @@ const UserAuthentication: React.FC<UserAuthenticationProps> = ({
     const fetchAuthData = async () => {
       try {
         const response = await fetch('/api/user-authentication');
-        const data = await response.json();
-        setAuthData(data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setAuthData(data);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching user authentication data:', error);
       }

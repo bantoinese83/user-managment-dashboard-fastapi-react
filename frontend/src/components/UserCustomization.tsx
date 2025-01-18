@@ -7,43 +7,53 @@ interface UserCustomizationProps {
     avatar: string;
     bio: string;
     theme: string;
-  };
+  } | null;
   onProfileUpdate: (userId: number, updatedProfile: { avatar: string; bio: string }) => void;
   onThemeChange: (userId: number, newTheme: string) => void;
 }
 
 const UserCustomization: React.FC<UserCustomizationProps> = ({ user, onProfileUpdate, onThemeChange }) => {
-  const [avatar, setAvatar] = useState(user.avatar);
-  const [bio, setBio] = useState(user.bio);
-  const [theme, setTheme] = useState(user.theme);
-  const [fetchedUser, setFetchedUser] = useState(user);
+  const [avatar, setAvatar] = useState(user?.avatar || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [theme, setTheme] = useState(user?.theme || '');
+  const [, setFetchedUser] = useState(user);
 
   useEffect(() => {
-    const fetchUserCustomizationData = async () => {
-      try {
-        const response = await fetch(`/api/user-customization/${user.id}`);
-        const data = await response.json();
-        setFetchedUser(data);
-        setAvatar(data.avatar);
-        setBio(data.bio);
-        setTheme(data.theme);
-      } catch (error) {
-        console.error('Error fetching user customization data:', error);
-      }
-    };
+    if (user) {
+      const fetchUserCustomizationData = async () => {
+        try {
+          const response = await fetch(`/api/user-customization/${user.id}`);
+          const data = await response.json();
+          setFetchedUser(data);
+          setAvatar(data.avatar);
+          setBio(data.bio);
+          setTheme(data.theme);
+        } catch (error) {
+          console.error('Error fetching user customization data:', error);
+        }
+      };
 
-    fetchUserCustomizationData();
-  }, [user.id]);
+      fetchUserCustomizationData();
+    }
+  }, [user]);
 
   const handleProfileUpdate = () => {
-    onProfileUpdate(user.id, { avatar, bio });
+    if (user) {
+      onProfileUpdate(user.id, { avatar, bio });
+    }
   };
 
   const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newTheme = event.target.value;
     setTheme(newTheme);
-    onThemeChange(user.id, newTheme);
+    if (user) {
+      onThemeChange(user.id, newTheme);
+    }
   };
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">

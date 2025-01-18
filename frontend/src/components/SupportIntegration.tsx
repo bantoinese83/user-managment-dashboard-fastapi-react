@@ -6,7 +6,7 @@ interface SupportIntegrationProps {
   helpArticles: { id: number; title: string; content: string }[];
 }
 
-const SupportIntegration: React.FC<SupportIntegrationProps> = ({ tickets, chats, helpArticles }) => {
+const SupportIntegration: React.FC<SupportIntegrationProps> = ({ tickets = [], chats = [], helpArticles = [] }) => {
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Support & Helpdesk Integration</h2>

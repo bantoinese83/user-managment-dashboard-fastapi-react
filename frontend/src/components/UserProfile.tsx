@@ -14,7 +14,7 @@ interface UserProfileProps {
       date: string;
       activity: string;
     }[];
-  };
+  } | null;
   onRoleChange: (userId: number, newRole: string) => void;
 }
 
@@ -22,22 +22,30 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
   const [userData, setUserData] = useState(user);
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch(`/api/user-profile/${user.id}`);
-        const data = await response.json();
-        setUserData(data);
-      } catch (error) {
-        console.error('Error fetching user profile data:', error);
-      }
-    };
+    if (user) {
+      const fetchUserProfile = async () => {
+        try {
+          const response = await fetch(`/api/user-profile/${user.id}`);
+          const data = await response.json();
+          setUserData(data);
+        } catch (error) {
+          console.error('Error fetching user profile data:', error);
+        }
+      };
 
-    fetchUserProfile();
-  }, [user.id]);
+      fetchUserProfile();
+    }
+  }, [user]);
 
   const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onRoleChange(userData.id, event.target.value);
+    if (userData) {
+      onRoleChange(userData.id, event.target.value);
+    }
   };
+
+  if (!userData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
