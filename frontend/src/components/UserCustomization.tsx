@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface UserCustomizationProps {
   user: {
@@ -16,6 +16,24 @@ const UserCustomization: React.FC<UserCustomizationProps> = ({ user, onProfileUp
   const [avatar, setAvatar] = useState(user.avatar);
   const [bio, setBio] = useState(user.bio);
   const [theme, setTheme] = useState(user.theme);
+  const [fetchedUser, setFetchedUser] = useState(user);
+
+  useEffect(() => {
+    const fetchUserCustomizationData = async () => {
+      try {
+        const response = await fetch(`/api/user-customization/${user.id}`);
+        const data = await response.json();
+        setFetchedUser(data);
+        setAvatar(data.avatar);
+        setBio(data.bio);
+        setTheme(data.theme);
+      } catch (error) {
+        console.error('Error fetching user customization data:', error);
+      }
+    };
+
+    fetchUserCustomizationData();
+  }, [user.id]);
 
   const handleProfileUpdate = () => {
     onProfileUpdate(user.id, { avatar, bio });

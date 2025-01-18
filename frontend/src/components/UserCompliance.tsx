@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UserComplianceProps {
   gdprCompliance: boolean;
@@ -17,6 +17,26 @@ const UserCompliance: React.FC<UserComplianceProps> = ({
   onTermsAcceptance,
   onDataRetentionChange,
 }) => {
+  const [fetchedGDPRCompliance, setFetchedGDPRCompliance] = useState(gdprCompliance);
+  const [fetchedTermsAccepted, setFetchedTermsAccepted] = useState(termsAccepted);
+  const [fetchedDataRetentionPolicy, setFetchedDataRetentionPolicy] = useState(dataRetentionPolicy);
+
+  useEffect(() => {
+    const fetchUserComplianceData = async () => {
+      try {
+        const response = await fetch('/api/user-compliance');
+        const data = await response.json();
+        setFetchedGDPRCompliance(data.gdprCompliance);
+        setFetchedTermsAccepted(data.termsAccepted);
+        setFetchedDataRetentionPolicy(data.dataRetentionPolicy);
+      } catch (error) {
+        console.error('Error fetching user compliance data:', error);
+      }
+    };
+
+    fetchUserComplianceData();
+  }, []);
+
   const handleDataRetentionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     onDataRetentionChange(event.target.value);
   };
@@ -26,7 +46,7 @@ const UserCompliance: React.FC<UserComplianceProps> = ({
       <h2 className="text-2xl font-bold mb-4">User Compliance & Legal Management</h2>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">GDPR/Privacy Compliance</h3>
-        <p>{gdprCompliance ? 'Compliant' : 'Not Compliant'}</p>
+        <p>{fetchedGDPRCompliance ? 'Compliant' : 'Not Compliant'}</p>
         <button
           onClick={onGDPRRequest}
           className="p-2 bg-blue-500 text-white rounded-lg"
@@ -36,7 +56,7 @@ const UserCompliance: React.FC<UserComplianceProps> = ({
       </div>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Terms of Service Acceptance</h3>
-        <p>{termsAccepted ? 'Accepted' : 'Not Accepted'}</p>
+        <p>{fetchedTermsAccepted ? 'Accepted' : 'Not Accepted'}</p>
         <button
           onClick={onTermsAcceptance}
           className="p-2 bg-green-500 text-white rounded-lg"
@@ -47,7 +67,7 @@ const UserCompliance: React.FC<UserComplianceProps> = ({
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Data Retention Policy</h3>
         <textarea
-          value={dataRetentionPolicy}
+          value={fetchedDataRetentionPolicy}
           onChange={handleDataRetentionChange}
           className="p-2 border border-gray-300 rounded-lg w-full"
         />

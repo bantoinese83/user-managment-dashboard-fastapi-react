@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Role {
   id: number;
@@ -14,10 +14,25 @@ interface UserAccessControlProps {
 const UserAccessControl: React.FC<UserAccessControlProps> = ({ roles, onRoleChange }) => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [newPermissions, setNewPermissions] = useState<string[]>([]);
+  const [fetchedRoles, setFetchedRoles] = useState<Role[]>([]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch('/api/roles');
+        const data = await response.json();
+        setFetchedRoles(data);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const handleRoleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const roleId = parseInt(event.target.value, 10);
-    const role = roles.find((r) => r.id === roleId) || null;
+    const role = fetchedRoles.find((r) => r.id === roleId) || null;
     setSelectedRole(role);
     setNewPermissions(role ? role.permissions : []);
   };
@@ -50,7 +65,7 @@ const UserAccessControl: React.FC<UserAccessControlProps> = ({ roles, onRoleChan
           <option value="" disabled>
             Select a role
           </option>
-          {roles.map((role) => (
+          {fetchedRoles.map((role) => (
             <option key={role.id} value={role.id}>
               {role.name}
             </option>
