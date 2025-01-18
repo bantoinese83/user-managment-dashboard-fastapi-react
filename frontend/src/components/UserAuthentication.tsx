@@ -14,7 +14,7 @@ const UserAuthentication: React.FC<UserAuthenticationProps> = ({
   onAccountUnlock,
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
-  const [authData, setAuthData] = useState<any>(null);
+  const [, setAuthData] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
