@@ -1,6 +1,5 @@
-from typing import List
 from fastapi import HTTPException
-from app.db.schemas import UserOverview, User, UserProfile, Role, UserActivity, CommunicationTools, UserSubscription, DataExport, UserCompliance, UserCustomization, UserEngagement, UserImportExport, Integration, SystemHealth
+
 
 # Define user-related API logic
 def get_user_overview():

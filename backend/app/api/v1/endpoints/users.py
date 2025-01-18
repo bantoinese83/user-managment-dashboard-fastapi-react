@@ -1,10 +1,12 @@
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 
-from app.db.models import User
-from app.db.schemas import UserOverview, UserProfile, Role, UserActivity, CommunicationTools, UserSubscription, DataExport, UserCompliance, UserCustomization, UserEngagement, UserImportExport, Integration, SystemHealth
-from app.db.session import get_session
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from backend.app.db.models import User
+from backend.app.db.schemas import UserOverview, UserProfile, Role, UserActivity, CommunicationTools, UserSubscription, \
+    DataExport, UserCompliance, UserCustomization, UserEngagement, UserImportExport, Integration, SystemHealth
+from backend.app.db.session import get_session
 
 router = APIRouter()
 
