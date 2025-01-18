@@ -9,15 +9,25 @@ interface UserImportExportProps {
 const UserImportExport: React.FC<UserImportExportProps> = ({ onImport, onExport, apiAccess }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fetchedApiAccess, setFetchedApiAccess] = useState(apiAccess);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserImportExportData = async () => {
       try {
         const response = await fetch('/api/user-import-export');
-        const data = await response.json();
-        setFetchedApiAccess(data.apiAccess);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedApiAccess(data.apiAccess);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching user import/export data:', error);
+        setError('Failed to fetch user import/export data. Please try again later.');
       }
     };
 
@@ -39,6 +49,7 @@ const UserImportExport: React.FC<UserImportExportProps> = ({ onImport, onExport,
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Import/Export</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Bulk Import</h3>
         <input type="file" onChange={handleFileChange} className="p-2 border border-gray-300 rounded-lg" />

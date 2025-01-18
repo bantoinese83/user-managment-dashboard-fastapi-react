@@ -68,16 +68,26 @@ const App: React.FC = () => {
       responseTime: 0,
     },
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch data from backend API and set state
     const fetchData = async () => {
       try {
         const response = await fetch('/api/user-overview');
-        const data = await response.json();
-        setUserOverviewData(data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setUserOverviewData(data);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching user overview data:', error);
+        setError('Failed to fetch user overview data. Please try again later.');
       }
     };
 
@@ -87,6 +97,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h1 className="text-4xl font-bold text-gray-800 mb-8">User Management Dashboard</h1>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <UserOverview {...userOverviewData} />
         <UserList users={userListData} />

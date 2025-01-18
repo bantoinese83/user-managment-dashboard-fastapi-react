@@ -15,15 +15,25 @@ const UserAccessControl: React.FC<UserAccessControlProps> = ({ roles, onRoleChan
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [newPermissions, setNewPermissions] = useState<string[]>([]);
   const [fetchedRoles, setFetchedRoles] = useState<Role[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const response = await fetch('/api/roles');
-        const data = await response.json();
-        setFetchedRoles(data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedRoles(data);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching roles:', error);
+        setError('Failed to fetch roles. Please try again later.');
       }
     };
 
@@ -55,6 +65,7 @@ const UserAccessControl: React.FC<UserAccessControlProps> = ({ roles, onRoleChan
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Access Control</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <label className="block text-lg font-semibold mb-2">Select Role</label>
         <select

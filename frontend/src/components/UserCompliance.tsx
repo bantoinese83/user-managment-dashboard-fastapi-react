@@ -20,17 +20,27 @@ const UserCompliance: React.FC<UserComplianceProps> = ({
   const [fetchedGDPRCompliance, setFetchedGDPRCompliance] = useState(gdprCompliance);
   const [fetchedTermsAccepted, setFetchedTermsAccepted] = useState(termsAccepted);
   const [fetchedDataRetentionPolicy, setFetchedDataRetentionPolicy] = useState(dataRetentionPolicy);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserComplianceData = async () => {
       try {
         const response = await fetch('/api/user-compliance');
-        const data = await response.json();
-        setFetchedGDPRCompliance(data.gdprCompliance);
-        setFetchedTermsAccepted(data.termsAccepted);
-        setFetchedDataRetentionPolicy(data.dataRetentionPolicy);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedGDPRCompliance(data.gdprCompliance);
+          setFetchedTermsAccepted(data.termsAccepted);
+          setFetchedDataRetentionPolicy(data.dataRetentionPolicy);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching user compliance data:', error);
+        setError('Failed to fetch user compliance data. Please try again later.');
       }
     };
 
@@ -44,6 +54,7 @@ const UserCompliance: React.FC<UserComplianceProps> = ({
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Compliance & Legal Management</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <h3 className="text-lg font-semibold">GDPR/Privacy Compliance</h3>
         <p>{fetchedGDPRCompliance ? 'Compliant' : 'Not Compliant'}</p>

@@ -10,17 +10,27 @@ const UserActivity: React.FC<UserActivityProps> = ({ loginLogoutLogs, activityFe
   const [fetchedLoginLogoutLogs, setFetchedLoginLogoutLogs] = useState(loginLogoutLogs);
   const [fetchedActivityFeed, setFetchedActivityFeed] = useState(activityFeed);
   const [fetchedAuditTrail, setFetchedAuditTrail] = useState(auditTrail);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserActivityData = async () => {
       try {
         const response = await fetch('/api/user-activity');
-        const data = await response.json();
-        setFetchedLoginLogoutLogs(data.loginLogoutLogs);
-        setFetchedActivityFeed(data.activityFeed);
-        setFetchedAuditTrail(data.auditTrail);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedLoginLogoutLogs(data.loginLogoutLogs);
+          setFetchedActivityFeed(data.activityFeed);
+          setFetchedAuditTrail(data.auditTrail);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching user activity data:', error);
+        setError('Failed to fetch user activity data. Please try again later.');
       }
     };
 
@@ -30,6 +40,7 @@ const UserActivity: React.FC<UserActivityProps> = ({ loginLogoutLogs, activityFe
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Activity</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Login/Logout Logs</h3>
         <ul>

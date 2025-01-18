@@ -12,16 +12,26 @@ interface SystemHealthProps {
 const SystemHealth: React.FC<SystemHealthProps> = ({ systemStatus, performanceMetrics }) => {
   const [fetchedSystemStatus, setFetchedSystemStatus] = useState(systemStatus);
   const [fetchedPerformanceMetrics, setFetchedPerformanceMetrics] = useState(performanceMetrics);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSystemHealthData = async () => {
       try {
         const response = await fetch('/api/system-health');
-        const data = await response.json();
-        setFetchedSystemStatus(data.systemStatus);
-        setFetchedPerformanceMetrics(data.performanceMetrics);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedSystemStatus(data.systemStatus);
+          setFetchedPerformanceMetrics(data.performanceMetrics);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching system health data:', error);
+        setError('Failed to fetch system health data. Please try again later.');
       }
     };
 
@@ -31,6 +41,7 @@ const SystemHealth: React.FC<SystemHealthProps> = ({ systemStatus, performanceMe
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">System Health</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <h3 className="text-lg font-semibold">System Status</h3>
         <p className="text-xl">{fetchedSystemStatus}</p>
