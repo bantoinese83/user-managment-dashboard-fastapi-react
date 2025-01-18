@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface Integration {
   id: number;
@@ -14,11 +14,27 @@ interface IntegrationsProps {
 }
 
 const Integrations: React.FC<IntegrationsProps> = ({ integrations, onConnect, onDisconnect }) => {
+  const [fetchedIntegrations, setFetchedIntegrations] = useState<Integration[]>(integrations);
+
+  useEffect(() => {
+    const fetchIntegrationsData = async () => {
+      try {
+        const response = await fetch('/api/integrations');
+        const data = await response.json();
+        setFetchedIntegrations(data);
+      } catch (error) {
+        console.error('Error fetching integrations data:', error);
+      }
+    };
+
+    fetchIntegrationsData();
+  }, []);
+
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Third-Party Integrations</h2>
       <div className="grid grid-cols-1 gap-4">
-        {integrations.map((integration) => (
+        {fetchedIntegrations.map((integration) => (
           <div key={integration.id} className="p-4 bg-gray-100 rounded-lg">
             <h3 className="text-lg font-semibold">{integration.name}</h3>
             <p>{integration.description}</p>

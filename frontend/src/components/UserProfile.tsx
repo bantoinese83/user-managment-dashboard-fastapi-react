@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UserProfileProps {
   user: {
@@ -19,8 +19,24 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
+  const [userData, setUserData] = useState(user);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch(`/api/user-profile/${user.id}`);
+        const data = await response.json();
+        setUserData(data);
+      } catch (error) {
+        console.error('Error fetching user profile data:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user.id]);
+
   const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onRoleChange(user.id, event.target.value);
+    onRoleChange(userData.id, event.target.value);
   };
 
   return (
@@ -28,14 +44,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
       <h2 className="text-2xl font-bold mb-4">User Profile</h2>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Contact Details</h3>
-        <p>Name: {user.name}</p>
-        <p>Email: {user.email}</p>
-        <p>Phone: {user.contactDetails.phone}</p>
-        <p>Address: {user.contactDetails.address}</p>
+        <p>Name: {userData.name}</p>
+        <p>Email: {userData.email}</p>
+        <p>Phone: {userData.contactDetails.phone}</p>
+        <p>Address: {userData.contactDetails.address}</p>
       </div>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Role Management</h3>
-        <select value={user.role} onChange={handleRoleChange} className="p-2 border border-gray-300 rounded-lg">
+        <select value={userData.role} onChange={handleRoleChange} className="p-2 border border-gray-300 rounded-lg">
           <option value="admin">Admin</option>
           <option value="moderator">Moderator</option>
           <option value="member">Member</option>
@@ -44,7 +60,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
       <div>
         <h3 className="text-lg font-semibold">Activity Logs</h3>
         <ul>
-          {user.activityLogs.map((log, index) => (
+          {userData.activityLogs.map((log, index) => (
             <li key={index}>
               {log.date}: {log.activity}
             </li>

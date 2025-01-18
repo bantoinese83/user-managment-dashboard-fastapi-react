@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UserEngagementProps {
   gamificationInsights: { achievement: string; points: number }[];
@@ -7,13 +7,33 @@ interface UserEngagementProps {
 }
 
 const UserEngagement: React.FC<UserEngagementProps> = ({ gamificationInsights, activityMilestones, engagementAnalytics }) => {
+  const [fetchedGamificationInsights, setFetchedGamificationInsights] = useState(gamificationInsights);
+  const [fetchedActivityMilestones, setFetchedActivityMilestones] = useState(activityMilestones);
+  const [fetchedEngagementAnalytics, setFetchedEngagementAnalytics] = useState(engagementAnalytics);
+
+  useEffect(() => {
+    const fetchUserEngagementData = async () => {
+      try {
+        const response = await fetch('/api/user-engagement');
+        const data = await response.json();
+        setFetchedGamificationInsights(data.gamificationInsights);
+        setFetchedActivityMilestones(data.activityMilestones);
+        setFetchedEngagementAnalytics(data.engagementAnalytics);
+      } catch (error) {
+        console.error('Error fetching user engagement data:', error);
+      }
+    };
+
+    fetchUserEngagementData();
+  }, []);
+
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Engagement & Retention</h2>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Gamification Insights</h3>
         <ul>
-          {gamificationInsights.map((insight, index) => (
+          {fetchedGamificationInsights.map((insight, index) => (
             <li key={index}>
               {insight.achievement}: {insight.points} points
             </li>
@@ -23,7 +43,7 @@ const UserEngagement: React.FC<UserEngagementProps> = ({ gamificationInsights, a
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Activity Milestones</h3>
         <ul>
-          {activityMilestones.map((milestone, index) => (
+          {fetchedActivityMilestones.map((milestone, index) => (
             <li key={index}>
               {milestone.milestone}: {milestone.date}
             </li>
@@ -33,7 +53,7 @@ const UserEngagement: React.FC<UserEngagementProps> = ({ gamificationInsights, a
       <div>
         <h3 className="text-lg font-semibold">Engagement Analytics</h3>
         <ul>
-          {engagementAnalytics.map((analytic, index) => (
+          {fetchedEngagementAnalytics.map((analytic, index) => (
             <li key={index}>
               {analytic.metric}: {analytic.value}
             </li>

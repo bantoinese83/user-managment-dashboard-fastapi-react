@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface User {
   id: number;
@@ -16,6 +16,21 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [fetchedUsers, setFetchedUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        setFetchedUsers(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -33,7 +48,7 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
     );
   };
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = fetchedUsers.filter((user) => {
     const matchesSearchTerm =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||

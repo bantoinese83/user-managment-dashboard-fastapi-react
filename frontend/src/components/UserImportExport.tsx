@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface UserImportExportProps {
   onImport: (file: File) => void;
@@ -8,6 +8,21 @@ interface UserImportExportProps {
 
 const UserImportExport: React.FC<UserImportExportProps> = ({ onImport, onExport, apiAccess }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fetchedApiAccess, setFetchedApiAccess] = useState(apiAccess);
+
+  useEffect(() => {
+    const fetchUserImportExportData = async () => {
+      try {
+        const response = await fetch('/api/user-import-export');
+        const data = await response.json();
+        setFetchedApiAccess(data.apiAccess);
+      } catch (error) {
+        console.error('Error fetching user import/export data:', error);
+      }
+    };
+
+    fetchUserImportExportData();
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -45,7 +60,7 @@ const UserImportExport: React.FC<UserImportExportProps> = ({ onImport, onExport,
       </div>
       <div>
         <h3 className="text-lg font-semibold">API Access</h3>
-        <p>{apiAccess}</p>
+        <p>{fetchedApiAccess}</p>
       </div>
     </div>
   );

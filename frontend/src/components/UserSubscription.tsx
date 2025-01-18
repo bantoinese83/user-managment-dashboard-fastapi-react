@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface UserSubscriptionProps {
   subscriptionPlan: string;
@@ -21,17 +21,37 @@ const UserSubscription: React.FC<UserSubscriptionProps> = ({
   paymentMethods,
   onPaymentMethodUpdate,
 }) => {
+  const [fetchedSubscriptionPlan, setFetchedSubscriptionPlan] = useState(subscriptionPlan);
+  const [fetchedBillingHistory, setFetchedBillingHistory] = useState(billingHistory);
+  const [fetchedPaymentMethods, setFetchedPaymentMethods] = useState(paymentMethods);
+
+  useEffect(() => {
+    const fetchUserSubscriptionData = async () => {
+      try {
+        const response = await fetch('/api/user-subscription');
+        const data = await response.json();
+        setFetchedSubscriptionPlan(data.subscriptionPlan);
+        setFetchedBillingHistory(data.billingHistory);
+        setFetchedPaymentMethods(data.paymentMethods);
+      } catch (error) {
+        console.error('Error fetching user subscription data:', error);
+      }
+    };
+
+    fetchUserSubscriptionData();
+  }, []);
+
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Subscription & Billing</h2>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Current Plan</h3>
-        <p>{subscriptionPlan}</p>
+        <p>{fetchedSubscriptionPlan}</p>
       </div>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Billing History</h3>
         <ul>
-          {billingHistory.map((entry, index) => (
+          {fetchedBillingHistory.map((entry, index) => (
             <li key={index}>
               {entry.date}: {entry.amount} - {entry.status}
             </li>
@@ -41,7 +61,7 @@ const UserSubscription: React.FC<UserSubscriptionProps> = ({
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Payment Methods</h3>
         <ul>
-          {paymentMethods.map((method) => (
+          {fetchedPaymentMethods.map((method) => (
             <li key={method.id}>
               {method.type} ending in {method.last4}
               <button

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface DataExportProps {
   onExport: (format: string) => void;
@@ -14,6 +14,24 @@ interface DataExportProps {
 }
 
 const DataExport: React.FC<DataExportProps> = ({ onExport, customReports, analytics }) => {
+  const [fetchedCustomReports, setFetchedCustomReports] = useState(customReports);
+  const [fetchedAnalytics, setFetchedAnalytics] = useState(analytics);
+
+  useEffect(() => {
+    const fetchDataExportOptions = async () => {
+      try {
+        const response = await fetch('/api/data-export');
+        const data = await response.json();
+        setFetchedCustomReports(data.customReports);
+        setFetchedAnalytics(data.analytics);
+      } catch (error) {
+        console.error('Error fetching data export options:', error);
+      }
+    };
+
+    fetchDataExportOptions();
+  }, []);
+
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Data Export & Reporting</h2>
@@ -41,7 +59,7 @@ const DataExport: React.FC<DataExportProps> = ({ onExport, customReports, analyt
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Custom Reports</h3>
         <ul>
-          {customReports.map((report) => (
+          {fetchedCustomReports.map((report) => (
             <li key={report.id}>
               <h4 className="font-semibold">{report.name}</h4>
               <p>{report.description}</p>
@@ -52,7 +70,7 @@ const DataExport: React.FC<DataExportProps> = ({ onExport, customReports, analyt
       <div>
         <h3 className="text-lg font-semibold">Analytics</h3>
         <ul>
-          {analytics.map((data, index) => (
+          {fetchedAnalytics.map((data, index) => (
             <li key={index}>
               {data.metric}: {data.value}
             </li>

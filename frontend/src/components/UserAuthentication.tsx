@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface UserAuthenticationProps {
   onMFASetup: (userId: number) => void;
@@ -14,6 +14,21 @@ const UserAuthentication: React.FC<UserAuthenticationProps> = ({
   onAccountUnlock,
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
+  const [authData, setAuthData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchAuthData = async () => {
+      try {
+        const response = await fetch('/api/user-authentication');
+        const data = await response.json();
+        setAuthData(data);
+      } catch (error) {
+        console.error('Error fetching user authentication data:', error);
+      }
+    };
+
+    fetchAuthData();
+  }, []);
 
   const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserId(parseInt(event.target.value, 10));
