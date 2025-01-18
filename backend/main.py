@@ -6,9 +6,11 @@ from fastapi import FastAPI, HTTPException
 from backend.middlewares import init_middlewares
 from backend.schemas import UserOverview, User, UserProfile, Role, UserActivity, CommunicationTools, UserSubscription, \
     DataExport, UserCompliance, UserCustomization, UserEngagement, UserImportExport, Integration, SystemHealth
+from backend.database import create_all
 
 app = FastAPI()
 
+create_all()
 init_middlewares(app)
 
 # Define API endpoints
