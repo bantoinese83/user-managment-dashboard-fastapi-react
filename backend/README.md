@@ -44,7 +44,7 @@ pip install -r requirements.txt
 5. Start the FastAPI application:
 
 ```bash
-uvicorn backend.main:app --reload
+uvicorn app.main:app --reload
 ```
 
 6. Open your browser and navigate to `http://127.0.0.1:8000/docs` to access the automatically generated Swagger UI documentation.
@@ -75,12 +75,17 @@ npm start
 
 ### Backend
 
-- `backend/main.py`: The main entry point of the application, containing the FastAPI instance and route definitions.
-- `backend/auth.py`: Contains authentication-related functions and utilities, such as creating and verifying JWT tokens.
-- `backend/models.py`: Defines the data models used in the application.
-- `backend/database.py`: Sets up the database connection and session.
-- `backend/schemas.py`: Defines the Pydantic schemas for request and response validation.
-- `backend/crud.py`: Contains the CRUD (Create, Read, Update, Delete) operations for interacting with the database.
+- `app/main.py`: The main entry point of the application, containing the FastAPI instance and route definitions.
+- `app/core/config.py`: Contains configuration-related functions and utilities.
+- `app/core/security.py`: Contains security-related functions and utilities, such as creating and verifying JWT tokens.
+- `app/db/models.py`: Defines the data models used in the application.
+- `app/db/session.py`: Sets up the database connection and session.
+- `app/db/schemas.py`: Defines the Pydantic schemas for request and response validation.
+- `app/api/v1/endpoints/auth.py`: Contains authentication-related functions and utilities.
+- `app/api/v1/endpoints/users.py`: Contains user-related functions and utilities.
+- `app/services/user_service.py`: Contains the user-related service functions.
+- `app/middlewares/error_handler.py`: Contains the error handler middleware.
+- `app/middlewares/logging.py`: Contains the logging middleware.
 
 ### Frontend
 
