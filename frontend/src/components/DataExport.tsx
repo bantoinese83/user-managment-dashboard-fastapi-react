@@ -16,16 +16,26 @@ interface DataExportProps {
 const DataExport: React.FC<DataExportProps> = ({ onExport, customReports, analytics }) => {
   const [fetchedCustomReports, setFetchedCustomReports] = useState(customReports);
   const [fetchedAnalytics, setFetchedAnalytics] = useState(analytics);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDataExportOptions = async () => {
       try {
         const response = await fetch('/api/data-export');
-        const data = await response.json();
-        setFetchedCustomReports(data.customReports);
-        setFetchedAnalytics(data.analytics);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedCustomReports(data.customReports);
+          setFetchedAnalytics(data.analytics);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching data export options:', error);
+        setError('Failed to fetch data export options. Please try again later.');
       }
     };
 
@@ -35,6 +45,7 @@ const DataExport: React.FC<DataExportProps> = ({ onExport, customReports, analyt
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Data Export & Reporting</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Export Data</h3>
         <button

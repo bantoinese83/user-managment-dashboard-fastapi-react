@@ -15,15 +15,25 @@ interface IntegrationsProps {
 
 const Integrations: React.FC<IntegrationsProps> = ({ integrations, onConnect, onDisconnect }) => {
   const [fetchedIntegrations, setFetchedIntegrations] = useState<Integration[]>(integrations);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchIntegrationsData = async () => {
       try {
         const response = await fetch('/api/integrations');
-        const data = await response.json();
-        setFetchedIntegrations(data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedIntegrations(data);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching integrations data:', error);
+        setError('Failed to fetch integrations data. Please try again later.');
       }
     };
 
@@ -33,6 +43,7 @@ const Integrations: React.FC<IntegrationsProps> = ({ integrations, onConnect, on
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Third-Party Integrations</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="grid grid-cols-1 gap-4">
         {fetchedIntegrations.map((integration) => (
           <div key={integration.id} className="p-4 bg-gray-100 rounded-lg">

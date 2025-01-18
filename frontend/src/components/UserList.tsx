@@ -17,15 +17,25 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
   const [filter, setFilter] = useState('all');
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [fetchedUsers, setFetchedUsers] = useState<User[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await fetch('/api/users');
-        const data = await response.json();
-        setFetchedUsers(data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setFetchedUsers(data);
+        } else {
+          throw new Error('Response is not JSON');
+        }
       } catch (error) {
         console.error('Error fetching users:', error);
+        setError('Failed to fetch users. Please try again later.');
       }
     };
 
@@ -66,6 +76,7 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User List</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <input
           type="text"

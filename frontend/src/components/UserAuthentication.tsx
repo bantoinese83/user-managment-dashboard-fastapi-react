@@ -15,6 +15,7 @@ const UserAuthentication: React.FC<UserAuthenticationProps> = ({
 }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [authData, setAuthData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAuthData = async () => {
@@ -32,6 +33,7 @@ const UserAuthentication: React.FC<UserAuthenticationProps> = ({
         }
       } catch (error) {
         console.error('Error fetching user authentication data:', error);
+        setError('Failed to fetch user authentication data. Please try again later.');
       }
     };
 
@@ -45,6 +47,7 @@ const UserAuthentication: React.FC<UserAuthenticationProps> = ({
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">User Authentication & Security</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="mb-4">
         <label className="block text-lg font-semibold mb-2">User ID</label>
         <input
