@@ -1,106 +1,136 @@
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from backend.app.db.models import User, Role, UserActivity, CommunicationTool, UserSubscription, DataExport, UserCompliance, UserCustomization, UserEngagement, UserImportExport, Integration, SystemHealth
+from backend.app.db.session import get_session
 
 
-# Define user-related API logic
-def get_user_overview():
+def get_user_overview(db: Session = get_session()):
+    total_users = db.query(User).count()
+    active_users = db.query(User).filter(User.status == "active").count()
+    new_registrations = db.query(User).filter(User.status == "new").count()
+    inactive_users = db.query(User).filter(User.status == "inactive").count()
     return {
-        "totalUsers": 1000,
-        "activeUsers": 800,
-        "newRegistrations": 50,
-        "inactiveUsers": 200
+        "totalUsers": total_users,
+        "activeUsers": active_users,
+        "newRegistrations": new_registrations,
+        "inactiveUsers": inactive_users
     }
 
-def get_users():
-    return [
-        {"id": 1, "name": "John Doe", "email": "john@example.com", "role": "admin", "status": "active"},
-        {"id": 2, "name": "Jane Smith", "email": "jane@example.com", "role": "moderator", "status": "inactive"}
-    ]
+def get_users(db: Session = get_session()):
+    return db.query(User).all()
 
-def get_user_profile(user_id: int):
-    if user_id == 1:
+def get_user_profile(user_id: int, db: Session = get_session()):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        contact_details = {
+            "phone": user.contact_details.phone,
+            "address": user.contact_details.address
+        }
+        activity_logs = [
+            {"date": log.date, "activity": log.activity}
+        for log in user.activity_logs]
         return {
-            "id": 1,
-            "name": "John Doe",
-            "email": "john@example.com",
-            "role": "admin",
-            "contactDetails": {"phone": "123-456-7890", "address": "123 Main St"},
-            "activityLogs": [{"date": "2023-01-01", "activity": "Logged in"}]
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role,
+            "contactDetails": contact_details,
+            "activityLogs": activity_logs
         }
     else:
         raise HTTPException(status_code=404, detail="User not found")
 
-def get_roles():
-    return [
-        {"id": 1, "name": "Admin", "permissions": ["read", "write", "admin"]},
-        {"id": 2, "name": "Moderator", "permissions": ["read", "write"]}
-    ]
+def get_roles(db: Session = get_session()):
+    return db.query(Role).all()
 
-def get_user_activity():
-    return {
-        "loginLogoutLogs": [{"date": "2023-01-01", "action": "Logged in"}],
-        "activityFeed": [{"date": "2023-01-01", "activity": "Posted a comment"}],
-        "auditTrail": [{"date": "2023-01-01", "action": "Changed password"}]
-    }
-
-def get_communication_tools():
-    return {
-        "messages": [{"date": "2023-01-01", "content": "Hello"}],
-        "notifications": [{"date": "2023-01-01", "content": "New message received"}],
-        "feedback": [{"date": "2023-01-01", "content": "Great app!"}]
-    }
-
-def get_user_subscription():
-    return {
-        "subscriptionPlan": "Premium",
-        "billingHistory": [{"date": "2023-01-01", "amount": "$10", "status": "Paid"}],
-        "paymentMethods": [{"id": 1, "type": "Credit Card", "last4": "1234"}]
-    }
-
-def get_data_export():
-    return {
-        "customReports": [{"id": 1, "name": "Monthly Report", "description": "Report for January"}],
-        "analytics": [{"metric": "Active Users", "value": 800}]
-    }
-
-def get_user_compliance():
-    return {
-        "gdprCompliance": True,
-        "termsAccepted": True,
-        "dataRetentionPolicy": "Retain data for 1 year"
-    }
-
-def get_user_customization(user_id: int):
-    if user_id == 1:
+def get_user_activity(db: Session = get_session()):
+    user_activity = db.query(UserActivity).first()
+    if user_activity:
         return {
-            "id": 1,
-            "name": "John Doe",
-            "avatar": "avatar.png",
-            "bio": "Hello, I'm John",
-            "theme": "light"
+            "loginLogoutLogs": user_activity.login_logout_logs,
+            "activityFeed": user_activity.activity_feed,
+            "auditTrail": user_activity.audit_trail
+        }
+    return None
+
+def get_communication_tools(db: Session = get_session()):
+    communication_tools = db.query(CommunicationTool).first()
+    if communication_tools:
+        return {
+            "messages": communication_tools.messages,
+            "notifications": communication_tools.notifications,
+            "feedback": communication_tools.feedback
+        }
+    return None
+
+def get_user_subscription(db: Session = get_session()):
+    user_subscription = db.query(UserSubscription).first()
+    if user_subscription:
+        return {
+            "subscriptionPlan": user_subscription.subscription_plan,
+            "billingHistory": user_subscription.billing_history,
+            "paymentMethods": user_subscription.payment_methods
+        }
+    return None
+
+def get_data_export(db: Session = get_session()):
+    data_export = db.query(DataExport).first()
+    if data_export:
+        return {
+            "customReports": data_export.custom_reports,
+            "analytics": data_export.analytics
+        }
+    return None
+
+def get_user_compliance(db: Session = get_session()):
+    user_compliance = db.query(UserCompliance).first()
+    if user_compliance:
+        return {
+            "gdprCompliance": user_compliance.gdpr_compliance,
+            "termsAccepted": user_compliance.terms_accepted,
+            "dataRetentionPolicy": user_compliance.data_retention_policy
+        }
+    return None
+
+def get_user_customization(user_id: int, db: Session = get_session()):
+    user_customization = db.query(UserCustomization).filter(UserCustomization.id == user_id).first()
+    if user_customization:
+        return {
+            "id": user_customization.id,
+            "name": user_customization.name,
+            "avatar": user_customization.avatar,
+            "bio": user_customization.bio,
+            "theme": user_customization.theme
         }
     else:
         raise HTTPException(status_code=404, detail="User not found")
 
-def get_user_engagement():
-    return {
-        "gamificationInsights": [{"achievement": "First Login", "points": 10}],
-        "activityMilestones": [{"milestone": "100 Posts", "date": "2023-01-01"}],
-        "engagementAnalytics": [{"metric": "Daily Active Users", "value": 500}]
-    }
+def get_user_engagement(db: Session = get_session()):
+    user_engagement = db.query(UserEngagement).first()
+    if user_engagement:
+        return {
+            "gamificationInsights": user_engagement.gamification_insights,
+            "activityMilestones": user_engagement.activity_milestones,
+            "engagementAnalytics": user_engagement.engagement_analytics
+        }
+    return None
 
-def get_user_import_export():
-    return {
-        "apiAccess": "Enabled"
-    }
+def get_user_import_export(db: Session = get_session()):
+    user_import_export = db.query(UserImportExport).first()
+    if user_import_export:
+        return {
+            "apiAccess": user_import_export.api_access
+        }
+    return None
 
-def get_integrations():
-    return [
-        {"id": 1, "name": "Slack", "description": "Slack integration", "status": "connected"},
-        {"id": 2, "name": "Google Analytics", "description": "Google Analytics integration", "status": "disconnected"}
-    ]
+def get_integrations(db: Session = get_session()):
+    return db.query(Integration).all()
 
-def get_system_health():
-    return {
-        "systemStatus": "Operational",
-        "performanceMetrics": {"cpuUsage": 50, "memoryUsage": 1024, "responseTime": 200}
-    }
+def get_system_health(db: Session = get_session()):
+    system_health = db.query(SystemHealth).first()
+    if system_health:
+        return {
+            "systemStatus": system_health.system_status,
+            "performanceMetrics": system_health.performance_metrics
+        }
+    return None
