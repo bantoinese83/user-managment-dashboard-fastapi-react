@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useUserContext } from '../context/UserContext';
 
 interface User {
   id: number;
@@ -8,39 +9,12 @@ interface User {
   status: string;
 }
 
-interface UserListProps {
-  users: User[];
-}
-
-const UserList: React.FC<UserListProps> = ({ users }) => {
+const UserList: React.FC = () => {
+  const { users } = useUserContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const [fetchedUsers, setFetchedUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch('/api/users');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          setFetchedUsers(data);
-        } else {
-          throw new Error('Response is not JSON');
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setError('Failed to fetch users. Please try again later.');
-      }
-    };
-
-    fetchUsers();
-  }, []);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -58,7 +32,7 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
     );
   };
 
-  const filteredUsers = fetchedUsers.filter((user) => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearchTerm =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||

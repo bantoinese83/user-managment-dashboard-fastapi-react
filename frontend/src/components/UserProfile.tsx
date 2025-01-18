@@ -1,49 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import { useUserContext } from '../context/UserContext';
 
 interface UserProfileProps {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    contactDetails: {
-      phone: string;
-      address: string;
-    };
-    activityLogs: {
-      date: string;
-      activity: string;
-    }[];
-  } | null;
   onRoleChange: (userId: number, newRole: string) => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
-  const [userData, setUserData] = useState(user);
+const UserProfile: React.FC<UserProfileProps> = ({ onRoleChange }) => {
+  const { users } = useUserContext();
+  const [selectedUser, setSelectedUser] = useState(users[0] || null);
 
   useEffect(() => {
-    if (user) {
-      const fetchUserProfile = async () => {
-        try {
-          const response = await fetch(`/api/user-profile/${user.id}`);
-          const data = await response.json();
-          setUserData(data);
-        } catch (error) {
-          console.error('Error fetching user profile data:', error);
-        }
-      };
-
-      fetchUserProfile();
+    if (users.length > 0) {
+      setSelectedUser(users[0]);
     }
-  }, [user]);
+  }, [users]);
 
   const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    if (userData) {
-      onRoleChange(userData.id, event.target.value);
+    if (selectedUser) {
+      onRoleChange(selectedUser.id, event.target.value);
     }
   };
 
-  if (!userData) {
+  if (!selectedUser) {
     return <div>Loading...</div>;
   }
 
@@ -52,14 +30,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
       <h2 className="text-2xl font-bold mb-4">User Profile</h2>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Contact Details</h3>
-        <p>Name: {userData.name}</p>
-        <p>Email: {userData.email}</p>
-        <p>Phone: {userData.contactDetails.phone}</p>
-        <p>Address: {userData.contactDetails.address}</p>
+        <p>Name: {selectedUser.name}</p>
+        <p>Email: {selectedUser.email}</p>
+        <p>Phone: {selectedUser.contactDetails.phone}</p>
+        <p>Address: {selectedUser.contactDetails.address}</p>
       </div>
       <div className="mb-4">
         <h3 className="text-lg font-semibold">Role Management</h3>
-        <select value={userData.role} onChange={handleRoleChange} className="p-2 border border-gray-300 rounded-lg">
+        <select value={selectedUser.role} onChange={handleRoleChange} className="p-2 border border-gray-300 rounded-lg">
           <option value="admin">Admin</option>
           <option value="moderator">Moderator</option>
           <option value="member">Member</option>
@@ -68,7 +46,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onRoleChange }) => {
       <div>
         <h3 className="text-lg font-semibold">Activity Logs</h3>
         <ul>
-          {userData.activityLogs.map((log, index) => (
+          {selectedUser.activityLogs.map((log, index) => (
             <li key={index}>
               {log.date}: {log.activity}
             </li>

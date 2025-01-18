@@ -15,6 +15,7 @@ import UserImportExport from './components/UserImportExport';
 import UserCustomization from './components/UserCustomization';
 import Integrations from './components/Integrations';
 import SystemHealth from './components/SystemHealth';
+import { UserContextProvider } from './context/UserContext';
 
 const App: React.FC = () => {
   const [userOverviewData, setUserOverviewData] = useState({
@@ -23,8 +24,6 @@ const App: React.FC = () => {
     newRegistrations: 0,
     inactiveUsers: 0,
   });
-  const [userListData, setUserListData] = useState([]);
-  const [userProfileData, setUserProfileData] = useState(null);
   const [rolesData, setRolesData] = useState([]);
   const [userActivityData, setUserActivityData] = useState({
     loginLogoutLogs: [],
@@ -95,33 +94,35 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">User Management Dashboard</h1>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <UserOverview {...userOverviewData} />
-        <UserList users={userListData} />
-        <UserProfile user={userProfileData} onRoleChange={(userId, newRole) => {}} />
-        <UserAccessControl roles={rolesData} onRoleChange={(roleId, newPermissions) => {}} />
-        <UserAuthentication
-          onMFASetup={(userId) => {}}
-          onPasswordReset={(userId) => {}}
-          onAccountLock={(userId) => {}}
-          onAccountUnlock={(userId) => {}}
-        />
-        <UserActivity {...userActivityData} />
-        <CommunicationTools {...communicationToolsData} />
-        <UserSubscription {...userSubscriptionData} />
-        <DataExport {...dataExportData} />
-        <UserCompliance {...userComplianceData} />
-        <UserEngagement {...userEngagementData} />
-        <SupportIntegration />
-        <UserImportExport {...userImportExportData} />
-        <UserCustomization user={userCustomizationData} onProfileUpdate={(userId, updatedProfile) => {}} onThemeChange={(userId, newTheme) => {}} />
-        <Integrations integrations={integrationsData} onConnect={(integrationId) => {}} onDisconnect={(integrationId) => {}} />
-        <SystemHealth {...systemHealthData} />
+    <UserContextProvider>
+      <div className="min-h-screen bg-gray-100 p-4">
+        <h1 className="text-4xl font-bold text-gray-800 mb-8">User Management Dashboard</h1>
+        {error && <div className="text-red-500 mb-4">{error}</div>}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <UserOverview {...userOverviewData} />
+          <UserList />
+          <UserProfile onRoleChange={(userId, newRole) => {}} />
+          <UserAccessControl roles={rolesData} onRoleChange={(roleId, newPermissions) => {}} />
+          <UserAuthentication
+            onMFASetup={(userId) => {}}
+            onPasswordReset={(userId) => {}}
+            onAccountLock={(userId) => {}}
+            onAccountUnlock={(userId) => {}}
+          />
+          <UserActivity {...userActivityData} />
+          <CommunicationTools {...communicationToolsData} />
+          <UserSubscription {...userSubscriptionData} />
+          <DataExport {...dataExportData} />
+          <UserCompliance {...userComplianceData} />
+          <UserEngagement {...userEngagementData} />
+          <SupportIntegration />
+          <UserImportExport {...userImportExportData} />
+          <UserCustomization user={userCustomizationData} onProfileUpdate={(userId, updatedProfile) => {}} onThemeChange={(userId, newTheme) => {}} />
+          <Integrations integrations={integrationsData} onConnect={(integrationId) => {}} onDisconnect={(integrationId) => {}} />
+          <SystemHealth {...systemHealthData} />
+        </div>
       </div>
-    </div>
+    </UserContextProvider>
   );
 };
 
